@@ -3,249 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>一愚惊人 - 大马定制版</title>
+    <title>一愚惊人 - 大马终极版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        .active-team { transform: scale(1.1); border: 4px solid white; box-shadow: 0 0 20px rgba(255,255,255,0.5); z-index: 10; }
-        .hidden-word { filter: blur(20px); pointer-events: none; }
-        .peek-word { filter: blur(0px) !important; }
-        @keyframes pulse-red { 0% { background-color: #1e293b; } 50% { background-color: #991b1b; } 100% { background-color: #1e293b; } }
+        .active-team { transform: scale(1.1); border: 6px solid white; box-shadow: 0 0 30px rgba(255,255,255,0.6); z-index: 10; }
+        .hidden-word { color: transparent !important; text-shadow: 0 0 50px rgba(0,0,0,1); user-select: none; }
+        .peek-word { color: #1e293b !important; text-shadow: none !important; }
+        @keyframes pulse-red { 0% { background-color: #0f172a; } 50% { background-color: #7f1d1d; } 100% { background-color: #0f172a; } }
         .emergency { animation: pulse-red 0.5s infinite; }
+        /* 防止手机长按弹出菜单 */
+        * { -webkit-touch-callout: none; -webkit-user-select: none; }
     </style>
 </head>
-<body class="bg-slate-900 flex flex-col items-center justify-center min-h-screen p-4 text-white font-sans overflow-hidden">
+<body class="bg-slate-950 flex flex-col items-center justify-center min-h-screen p-4 text-white font-sans overflow-hidden">
 
     <div id="setup-screen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center p-6 overflow-y-auto">
-        <h1 class="text-3xl font-black mb-8 text-amber-400">游戏设置</h1>
+        <h1 class="text-4xl font-black mb-8 text-amber-400 italic">一愚惊人 SETTING</h1>
         
-        <div class="w-full max-w-md space-y-6">
-            <div>
-                <p class="mb-3 font-bold text-center">选择战队 (选两组)</p>
-                <div id="team-selector" class="grid grid-cols-2 gap-3">
-                    <button onclick="toggleTeam(this, '守银队', '#94a3b8')" class="p-3 rounded-xl border border-slate-700 bg-slate-800">守银队</button>
-                    <button onclick="toggleTeam(this, '娟金队', '#fbbf24')" class="p-3 rounded-xl border border-slate-700 bg-slate-800">娟金队</button>
-                    <button onclick="toggleTeam(this, '极白队', '#ffffff')" class="p-3 rounded-xl border border-slate-700 bg-slate-800 text-slate-900">极白队</button>
-                    <button onclick="toggleTeam(this, '绸黑队', '#000000')" class="p-3 rounded-xl border border-slate-700 bg-slate-800">绸黑队</button>
-                    <button onclick="toggleTeam(this, '绿奇队', '#22c55e')" class="p-3 rounded-xl border border-slate-700 bg-slate-800">绿奇队</button>
-                    <button onclick="toggleTeam(this, '寒蓝队', '#3b82f6')" class="p-3 rounded-xl border border-slate-700 bg-slate-800">寒蓝队</button>
-                    <button onclick="toggleTeam(this, '绍黄队', '#eab308')" class="p-3 rounded-xl border border-slate-700 bg-slate-800 text-slate-900">绍黄队</button>
-                    <button onclick="toggleTeam(this, '棕紫队', '#a855f7')" class="p-3 rounded-xl border border-slate-700 bg-slate-800">棕紫队</button>
+        <div class="w-full max-w-md space-y-8">
+            <div class="grid grid-cols-2 gap-4" id="team-selector">
                 </div>
+
+            <div class="text-center bg-slate-800 p-6 rounded-3xl">
+                <p class="mb-4 font-bold text-xl text-amber-200">胜利分数: <span id="target-display">10</span></p>
+                <input type="range" min="5" max="15" value="10" id="target-slider" 
+                       oninput="document.getElementById('target-display').innerText=this.value" 
+                       class="w-full h-3 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-400">
             </div>
 
-            <div class="text-center">
-                <p class="mb-2 font-bold">目标分数: <span id="target-display">10</span></p>
-                <input type="range" min="5" max="15" value="10" id="target-slider" oninput="document.getElementById('target-display').innerText=this.value" class="w-full">
-            </div>
-
-            <button onclick="startGameSession()" class="w-full bg-amber-400 text-slate-900 font-black py-4 rounded-2xl text-xl shadow-lg">进入游戏</button>
+            <button onclick="startGameSession()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-black py-5 rounded-2xl text-2xl shadow-[0_0_20px_rgba(251,191,36,0.4)]">开始派对</button>
         </div>
     </div>
 
-    <div class="w-full max-w-sm flex justify-between mb-8">
-        <div id="ui-teamA" class="p-4 rounded-3xl text-center w-[45%] transition-all duration-300">
-            <p id="labelA" class="text-xs font-bold opacity-70 uppercase tracking-widest">Team A</p>
-            <p id="scoreA" class="text-4xl font-black">0</p>
-            <p class="text-[10px] mt-1">Skip Left: <span id="skipsA">5</span></p>
+    <div class="w-full max-w-sm flex justify-between mb-6">
+        <div id="ui-teamA" class="p-4 rounded-3xl text-center w-[46%] transition-all duration-500 border-4 border-transparent">
+            <p id="labelA" class="text-sm font-black truncate">TEAM A</p>
+            <p id="scoreA" class="text-5xl font-black my-1">0</p>
         </div>
-        <div id="ui-teamB" class="p-4 rounded-3xl text-center w-[45%] transition-all duration-300">
-            <p id="labelB" class="text-xs font-bold opacity-70 uppercase tracking-widest">Team B</p>
-            <p id="scoreB" class="text-4xl font-black">0</p>
-            <p class="text-[10px] mt-1">Skip Left: <span id="skipsB">5</span></p>
+        <div id="ui-teamB" class="p-4 rounded-3xl text-center w-[46%] transition-all duration-500 border-4 border-transparent">
+            <p id="labelB" class="text-sm font-black truncate">TEAM B</p>
+            <p id="scoreB" class="text-5xl font-black my-1">0</p>
         </div>
     </div>
 
     <div id="card-area" 
-         onmousedown="peek(true)" onmouseup="peek(false)" 
-         ontouchstart="peek(true)" ontouchend="peek(false)"
-         class="w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl p-8 text-center relative overflow-hidden h-64 flex flex-col items-center justify-center">
-        
-        <div id="timer" class="absolute top-4 text-2xl font-mono text-slate-300 font-bold">60s</div>
-        
-        <div id="word-display" class="text-4xl font-black text-slate-800 hidden-word">点开始抽词</div>
-        
-        <div id="hint-text" class="absolute bottom-4 text-[10px] text-slate-400 uppercase tracking-tighter">长按中间可重看题目</div>
+         class="w-full max-w-sm bg-slate-100 rounded-[3rem] shadow-2xl p-10 text-center relative h-72 flex flex-col items-center justify-center transition-transform active:scale-95">
+        <div id="timer" class="absolute top-6 text-3xl font-mono text-slate-400 font-black">60s</div>
+        <div id="word-display" class="text-5xl font-black text-slate-800 transition-all duration-200">准备就绪</div>
+        <div id="hint-text" class="absolute bottom-6 text-xs text-slate-400 font-bold opacity-0 transition-opacity">长按屏幕显示提示</div>
     </div>
 
-    <div class="w-full max-w-sm mt-8 space-y-3">
-        <div id="pre-start-btns" class="grid grid-cols-2 gap-3">
-            <button onclick="drawWord()" class="col-span-2 bg-amber-400 text-slate-900 font-black py-4 rounded-2xl shadow-lg">抽词 / 换题</button>
-            <button id="btn-start" onclick="startTimerNow()" disabled class="col-span-2 bg-slate-700 text-slate-400 font-bold py-4 rounded-2xl opacity-50">开始倒计时</button>
+    <div class="w-full max-w-sm mt-8 space-y-4">
+        <div id="pre-game-controls" class="space-y-3">
+            <button id="btn-draw" onclick="drawWord()" class="w-full bg-white text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg border-b-8 border-slate-300 active:border-b-0 active:translate-y-2">抽题</button>
+            <button id="btn-change" onclick="changeWord()" class="w-full bg-slate-800 text-amber-400 font-bold py-3 rounded-xl border-2 border-slate-700 opacity-50 cursor-not-allowed">换题 (剩 5 次)</button>
+            <button id="btn-confirm" onclick="confirmAndStart()" class="w-full bg-amber-400 text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg hidden">确认并开始计时</button>
         </div>
 
-        <div id="action-btns" class="grid grid-cols-2 gap-3 hidden">
-            <button onclick="handlePoint()" class="bg-emerald-500 text-white font-black py-4 rounded-2xl shadow-lg">+1 得分</button>
-            <button onclick="handleSwitch()" class="bg-rose-500 text-white font-black py-4 rounded-2xl shadow-lg">被抢题 / 轮替</button>
-            <button onclick="handleSkip()" id="skip-btn" class="col-span-2 bg-slate-700 text-white font-bold py-2 rounded-xl text-sm">跳过本题 (剩 5 次)</button>
+        <div id="active-game-controls" class="grid grid-cols-2 gap-4 hidden">
+            <button onclick="handlePoint()" class="bg-emerald-500 text-white font-black py-5 rounded-2xl shadow-lg text-xl">+1 答对</button>
+            <button onclick="handleSwitch()" class="bg-rose-500 text-white font-black py-4 rounded-2xl shadow-lg font-bold">被抢/轮替</button>
         </div>
     </div>
 
     <script>
-        const speak = (msg) => {
-            const utterance = new SpeechSynthesisUtterance(msg);
-            utterance.lang = 'zh-CN';
-            window.speechSynthesis.speak(utterance);
-        };
+        const teams = [
+            { name: '守银队', bg: '#94a3b8', text: '#000000' },
+            { name: '娟金队', bg: '#fbbf24', text: '#000000' },
+            { name: '极白队', bg: '#ffffff', text: '#000000' },
+            { name: '绸黑队', bg: '#000000', text: '#ffffff' },
+            { name: '绿奇队', bg: '#22c55e', text: '#000000' },
+            { name: '寒蓝队', bg: '#3b82f6', text: '#ffffff' },
+            { name: '绍黄队', bg: '#eab308', text: '#000000' },
+            { name: '棕紫队', bg: '#a855f7', text: '#ffffff' }
+        ];
 
-        const playSound = (type) => {
-            if(type === 'win') speak('叻叻猪！');
-            if(type === 'fail') speak('哈哈哈 Peter');
-            if(type === 'end') speak('Delay no more');
-        };
-
-        // 词库 - 这里先放200个，你可以按格式加到1000个
-        const rawWords = "烧米,肉骨茶,巴刹,啰惹,椰浆饭,榴莲,鬼佬,马路杀手,摇脚,打工仔,老司机,大耳窿,跳槽,山竹,拉茶,咖喱面,云吞面,点心,炒粿条,海南鸡饭,波霸奶茶,江鱼仔,臭豆,娘惹,红包,恭喜发财,万事如意,心想事成,身体健康,年年有余,步步高升,大吉大利,平平安安,开工大吉,收工大吉,兴旺发,大彩,博彩,多多,万能,扫地机器人,智能手机,充电宝,自拍杆,无线耳机,蓝牙音箱,笔记本电脑,平板电脑,路由器,投影仪,空气净化器,吸尘器,微波炉,电饭煲,热水壶,吹风机,卷发棒,剃须刀,电动牙刷,按摩椅,跑步机,哑铃,瑜伽垫,跳绳,足球,篮球,羽毛球,乒乓球,网球,高尔夫球,游泳镜,潜水镜,冲浪板,滑板,滑轮鞋,头盔,护膝,护肘,手套,运动鞋,运动服,运动水壶,运动包,背包,提包,钱包,钥匙包,名片夹,护照夹,行李箱,遮阳伞,雨衣,墨镜,帽子,围巾,丝巾,领带,皮带,手表,戒指,项链,手链,耳环,发夹,香水,口红,粉底,眼影,睫毛膏,指甲油,洗面奶,沐浴露,洗发水,护发素,牙膏,漱口水,纸巾,湿纸巾,卫生巾,尿不湿,洗衣粉,洗洁精,消毒液,洗手液,垃圾袋,保鲜膜,铝箔纸,牙签,棉签,指甲钳,小剪刀,水果刀,开瓶器,螺丝刀,扳手,卷尺,手电筒,电池,打火机,蚊香,电蚊拍,苍蝇拍,老鼠笼,蟑螂药,蚂蚁药,胶水,透明胶,双面胶,订书机,回形针,便签本,笔记本,圆珠笔,铅笔,橡皮擦,尺子,圆规,计算器,剪贴簿,相框,挂钟,闹钟,花瓶,盆栽,鱼缸,鸟笼,宠物垫,牵引绳,猫砂,狗粮,鱼食,鸟食,扫把,拖把,水桶,抹布,围裙,隔热手套,餐巾布,桌布,杯垫,筷子,勺子,叉子,碗,盘,杯,水瓶,饭盒,保温杯,焖烧杯,调料盒,油壶,盐罐,糖罐,醋瓶,酱油瓶,咖啡壶,茶壶,滤茶器,打蛋器,面粉筛,擀面杖,模具,烤盘,烤网,锡纸,油纸";
-        const gameWords = rawWords.split(',');
-
-        let selectedTeams = [];
-        let teamA = { name: '', color: '', score: 0, skips: 5 };
-        let teamB = { name: '', color: '', score: 0, skips: 5 };
-        let targetScore = 10;
-        let currentTurn = 'A'; // 'A' or 'B'
-        let timer, timeLeft = 60;
-        let gameActive = false;
-
-        function toggleTeam(btn, name, color) {
-            const index = selectedTeams.findIndex(t => t.name === name);
-            if(index > -1) {
-                selectedTeams.splice(index, 1);
-                btn.style.border = "1px solid #334155";
-            } else if(selectedTeams.length < 2) {
-                selectedTeams.push({name, color});
-                btn.style.border = `4px solid ${color}`;
-            }
-        }
-
-        function startGameSession() {
-            if(selectedTeams.length < 2) return alert("请选两支战队！");
-            targetScore = document.getElementById('target-slider').value;
-            teamA = { ...selectedTeams[0], score: 0, skips: 5 };
-            teamB = { ...selectedTeams[1], score: 0, skips: 5 };
-            
-            document.getElementById('labelA').innerText = teamA.name;
-            document.getElementById('labelB').innerText = teamB.name;
-            document.getElementById('ui-teamA').style.backgroundColor = teamA.color + '33';
-            document.getElementById('ui-teamB').style.backgroundColor = teamB.color + '33';
-            
-            updateTurnUI();
-            document.getElementById('setup-screen').classList.add('hidden');
-        }
-
-        function updateTurnUI() {
-            const uiA = document.getElementById('ui-teamA');
-            const uiB = document.getElementById('ui-teamB');
-            if(currentTurn === 'A') {
-                uiA.classList.add('active-team');
-                uiB.classList.remove('active-team');
-                uiA.style.borderColor = teamA.color;
-            } else {
-                uiB.classList.add('active-team');
-                uiA.classList.remove('active-team');
-                uiB.style.borderColor = teamB.color;
-            }
-        }
-
-        function drawWord() {
-            const word = gameWords[Math.floor(Math.random() * gameWords.length)];
-            const display = document.getElementById('word-display');
-            display.innerText = word;
-            display.classList.remove('hidden-word');
-            document.getElementById('btn-start').disabled = false;
-            document.getElementById('btn-start').classList.remove('opacity-50');
-            document.getElementById('btn-start').classList.add('bg-blue-500', 'text-white');
-        }
-
-        function startTimerNow() {
-            document.getElementById('pre-start-btns').classList.add('hidden');
-            document.getElementById('action-btns').classList.remove('hidden');
-            document.getElementById('word-display').classList.add('hidden-word');
-            document.getElementById('category').innerText = "倒计时开始！";
-            
-            timeLeft = 60;
-            gameActive = true;
-            timer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timer').innerText = timeLeft + 's';
-                
-                if(timeLeft <= 5) {
-                    document.body.classList.add('emergency');
-                    // 警告声可以用简单的Beep
-                }
-                
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    playSound('end');
-                    handleSwitch();
-                }
-            }, 1000);
-        }
-
-        function peek(show) {
-            if(!gameActive) return;
-            const display = document.getElementById('word-display');
-            if(show) display.classList.add('peek-word');
-            else display.classList.remove('peek-word');
-        }
-
-        function handlePoint() {
-            clearInterval(timer);
-            gameActive = false;
-            document.body.classList.remove('emergency');
-            
-            if(currentTurn === 'A') {
-                teamA.score++;
-                document.getElementById('scoreA').innerText = teamA.score;
-            } else {
-                teamB.score++;
-                document.getElementById('scoreB').innerText = teamB.score;
-            }
-            
-            playSound('win');
-            checkWin();
-            resetControls();
-        }
-
-        function handleSwitch() {
-            clearInterval(timer);
-            gameActive = false;
-            document.body.classList.remove('emergency');
-            playSound('fail');
-            currentTurn = currentTurn === 'A' ? 'B' : 'A';
-            updateTurnUI();
-            resetControls();
-        }
-
-        function handleSkip() {
-            let activeTeam = currentTurn === 'A' ? teamA : teamB;
-            if(activeTeam.skips <= 0) return alert("没跳过次数了！");
-            activeTeam.skips--;
-            document.getElementById(`skips${currentTurn}`).innerText = activeTeam.skips;
-            drawWord();
-            document.getElementById('word-display').classList.add('hidden-word');
-        }
-
-        function resetControls() {
-            document.getElementById('pre-start-btns').classList.remove('hidden');
-            document.getElementById('action-btns').classList.add('hidden');
-            document.getElementById('word-display').innerText = "点开始抽词";
-            document.getElementById('word-display').classList.add('hidden-word');
-            document.getElementById('btn-start').disabled = true;
-            document.getElementById('timer').innerText = "60s";
-        }
-
-        function checkWin() {
-            if(teamA.score >= targetScore || teamB.score >= targetScore) {
-                const winner = teamA.score >= targetScore ? teamA.name : teamB.name;
-                confetti({
-                    particleCount: 200,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-                alert("🎉 " + winner + " 赢了！");
-                location.reload();
-            }
-        }
-    </script>
-</body>
-</html>
+        let
