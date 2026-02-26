@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>一愚惊人 - 大马终极版</title>
+    <title>年年有愚 FOOL星高照</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -12,58 +12,58 @@
         .peek-word { color: #1e293b !important; text-shadow: none !important; }
         @keyframes pulse-red { 0% { background-color: #0f172a; } 50% { background-color: #7f1d1d; } 100% { background-color: #0f172a; } }
         .emergency { animation: pulse-red 0.5s infinite; }
-        /* 防止手机长按弹出菜单 */
         * { -webkit-touch-callout: none; -webkit-user-select: none; }
     </style>
 </head>
 <body class="bg-slate-950 flex flex-col items-center justify-center min-h-screen p-4 text-white font-sans overflow-hidden">
 
     <div id="setup-screen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center p-6 overflow-y-auto">
-        <h1 class="text-4xl font-black mb-8 text-amber-400 italic">一愚惊人 SETTING</h1>
+        <h1 class="text-4xl font-black mb-2 text-amber-400 italic">年年有愚</h1>
+        <p class="text-amber-200 font-bold mb-8 tracking-[0.3em]">FOOL星高照</p>
         
         <div class="w-full max-w-md space-y-8">
             <div class="grid grid-cols-2 gap-4" id="team-selector">
                 </div>
 
-            <div class="text-center bg-slate-800 p-6 rounded-3xl">
-                <p class="mb-4 font-bold text-xl text-amber-200">胜利分数: <span id="target-display">10</span></p>
+            <div class="text-center bg-slate-800 p-6 rounded-3xl border border-slate-700">
+                <p class="mb-4 font-bold text-xl text-amber-100">目标分数: <span id="target-display">10</span></p>
                 <input type="range" min="5" max="15" value="10" id="target-slider" 
                        oninput="document.getElementById('target-display').innerText=this.value" 
                        class="w-full h-3 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-400">
             </div>
 
-            <button onclick="startGameSession()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-black py-5 rounded-2xl text-2xl shadow-[0_0_20px_rgba(251,191,36,0.4)]">开始派对</button>
+            <button onclick="startGameSession()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-black py-5 rounded-2xl text-2xl shadow-xl active:scale-95 transition-transform">开始派对</button>
         </div>
     </div>
 
     <div class="w-full max-w-sm flex justify-between mb-6">
-        <div id="ui-teamA" class="p-4 rounded-3xl text-center w-[46%] transition-all duration-500 border-4 border-transparent">
+        <div id="ui-teamA" class="p-4 rounded-3xl text-center w-[46%] transition-all duration-500 border-4 border-transparent shadow-lg">
             <p id="labelA" class="text-sm font-black truncate">TEAM A</p>
             <p id="scoreA" class="text-5xl font-black my-1">0</p>
         </div>
-        <div id="ui-teamB" class="p-4 rounded-3xl text-center w-[46%] transition-all duration-500 border-4 border-transparent">
+        <div id="ui-teamB" class="p-4 rounded-3xl text-center w-[46%] transition-all duration-500 border-4 border-transparent shadow-lg">
             <p id="labelB" class="text-sm font-black truncate">TEAM B</p>
             <p id="scoreB" class="text-5xl font-black my-1">0</p>
         </div>
     </div>
 
     <div id="card-area" 
-         class="w-full max-w-sm bg-slate-100 rounded-[3rem] shadow-2xl p-10 text-center relative h-72 flex flex-col items-center justify-center transition-transform active:scale-95">
+         class="w-full max-w-sm bg-slate-100 rounded-[3rem] shadow-2xl p-10 text-center relative h-72 flex flex-col items-center justify-center">
         <div id="timer" class="absolute top-6 text-3xl font-mono text-slate-400 font-black">60s</div>
-        <div id="word-display" class="text-5xl font-black text-slate-800 transition-all duration-200">准备就绪</div>
-        <div id="hint-text" class="absolute bottom-6 text-xs text-slate-400 font-bold opacity-0 transition-opacity">长按屏幕显示提示</div>
+        <div id="word-display" class="text-5xl font-black text-slate-800 transition-all duration-200">READY?</div>
+        <div id="hint-text" class="absolute bottom-6 text-xs text-slate-400 font-bold opacity-0">长按显示题目</div>
     </div>
 
     <div class="w-full max-w-sm mt-8 space-y-4">
         <div id="pre-game-controls" class="space-y-3">
-            <button id="btn-draw" onclick="drawWord()" class="w-full bg-white text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg border-b-8 border-slate-300 active:border-b-0 active:translate-y-2">抽题</button>
+            <button id="btn-draw" onclick="drawWord()" class="w-full bg-white text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg border-b-8 border-slate-300 active:border-b-0 active:translate-y-1">抽题</button>
             <button id="btn-change" onclick="changeWord()" class="w-full bg-slate-800 text-amber-400 font-bold py-3 rounded-xl border-2 border-slate-700 opacity-50 cursor-not-allowed">换题 (剩 5 次)</button>
-            <button id="btn-confirm" onclick="confirmAndStart()" class="w-full bg-amber-400 text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg hidden">确认并开始计时</button>
+            <button id="btn-confirm" onclick="confirmAndStart()" class="w-full bg-amber-400 text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg hidden">确认并开始</button>
         </div>
 
         <div id="active-game-controls" class="grid grid-cols-2 gap-4 hidden">
-            <button onclick="handlePoint()" class="bg-emerald-500 text-white font-black py-5 rounded-2xl shadow-lg text-xl">+1 答对</button>
-            <button onclick="handleSwitch()" class="bg-rose-500 text-white font-black py-4 rounded-2xl shadow-lg font-bold">被抢/轮替</button>
+            <button onclick="handlePoint()" class="bg-emerald-500 text-white font-black py-5 rounded-2xl shadow-lg text-xl border-b-8 border-emerald-700 active:border-b-0">+1 答对</button>
+            <button onclick="handleSwitch()" class="bg-rose-500 text-white font-black py-4 rounded-2xl shadow-lg font-bold border-b-8 border-rose-700 active:border-b-0">抢题/换人</button>
         </div>
     </div>
 
@@ -79,4 +79,153 @@
             { name: '棕紫队', bg: '#a855f7', text: '#ffffff' }
         ];
 
-        let
+        let selected = [];
+        let scoreA = 0, scoreB = 0;
+        let changeCount = 0;
+        let currentTurn = 'A';
+        let timer, timeLeft = 60, targetScore = 10;
+        let isTimerRunning = false;
+
+        const speak = (msg) => {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(msg);
+            u.lang = 'zh-CN'; u.rate = 1.1;
+            window.speechSynthesis.speak(u);
+        };
+
+        // 核心：强制初始化选择器
+        function initSelector() {
+            const container = document.getElementById('team-selector');
+            container.innerHTML = '';
+            teams.forEach(t => {
+                const btn = document.createElement('button');
+                btn.innerText = t.name;
+                btn.className = "py-4 rounded-2xl font-black text-lg border-4 border-transparent transition-all active:scale-90 shadow-md";
+                btn.style.backgroundColor = t.bg;
+                btn.style.color = t.text;
+                btn.onclick = () => {
+                    const idx = selected.findIndex(s => s.name === t.name);
+                    if(idx > -1) {
+                        selected.splice(idx, 1);
+                        btn.style.borderColor = "transparent";
+                    } else if(selected.length < 2) {
+                        selected.push(t);
+                        btn.style.borderColor = "#fbbf24";
+                        speak(t.name);
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+        window.onload = initSelector;
+
+        const rawWords = "烧米,肉骨茶,巴刹,啰惹,椰浆饭,榴莲,鬼佬,马路杀手,摇脚,打工仔,老司机,大耳窿,跳槽,山竹,拉茶,咖喱面,云吞面,点心,炒粿条,海南鸡饭,波霸奶茶,江鱼仔,臭豆,娘惹,红包,恭喜发财,万事如意,心想事成,身体健康,年年有余,步步高升,大吉大利,平平安安,开工大吉,收工大吉,兴旺发,大彩,博彩,多多,万能,扫地机器人,智能手机,充电宝,自拍杆,无线耳机,蓝牙音箱,笔记本电脑,平板电脑,路由器,投影仪,空气净化器,吸尘器,微波炉,电饭煲,热水壶,吹风机,卷发棒,剃须刀,电动牙刷,按摩椅,跑步机,哑铃,瑜伽垫,跳绳,足球,篮球,羽毛球,乒乓球,网球,高尔夫球,游泳镜,潜水镜,冲浪板,滑板,滑轮鞋,头盔,护膝,护肘,手套,运动鞋,运动服,运动水壶,运动包,背包,提包,钱包,钥匙包,名片夹,护照夹,行李箱,遮阳伞,雨衣,墨镜,帽子,围巾,丝巾,领带,皮带,手表,戒指,项链,手链,耳环,发夹,香水,口红,粉底,眼影,睫毛膏,指甲油,洗面奶,沐浴露,洗发水,护发素,牙膏,漱口水,纸巾,湿纸巾,卫生巾,尿不湿,洗衣粉,洗洁精,消毒液,洗手液,垃圾袋,保鲜膜,铝箔纸,牙签,棉签,指甲钳,小剪刀,水果刀,开瓶器,螺丝刀,扳手,卷尺,手电筒,电池,打火机,蚊香,电蚊拍,苍蝇拍,老鼠笼,蟑螂药,蚂蚁药,胶水,透明胶,双面胶,订书机,回形针,便签本,笔记本,圆珠笔,铅笔,橡皮擦,尺子,圆规,计算器,剪贴簿,相框,挂钟,闹钟,花瓶,盆栽,鱼缸,鸟笼,宠物垫,牵引绳,猫砂,狗粮,鱼食,鸟食,扫把,拖把,水桶,抹布,围裙,隔热手套,餐巾布,桌布,杯垫,筷子,勺子,叉子,碗,盘,杯,水瓶,饭盒,保温杯,焖烧杯,调料盒,油壶,盐罐,糖罐,醋瓶,酱油瓶,咖啡壶,茶壶,滤茶器,打蛋器,面粉筛,擀面杖,模具,烤盘,烤网,锡纸,油纸";
+        const gameWords = rawWords.split(',');
+
+        function startGameSession() {
+            if(selected.length < 2) return alert("请选两支战队！");
+            targetScore = parseInt(document.getElementById('target-slider').value);
+            document.getElementById('labelA').innerText = selected[0].name;
+            document.getElementById('labelB').innerText = selected[1].name;
+            document.getElementById('ui-teamA').style.backgroundColor = selected[0].bg;
+            document.getElementById('ui-teamA').style.color = selected[0].text;
+            document.getElementById('ui-teamB').style.backgroundColor = selected[1].bg;
+            document.getElementById('ui-teamB').style.color = selected[1].text;
+            document.getElementById('setup-screen').classList.add('hidden');
+            updateTurnUI();
+        }
+
+        function updateTurnUI() {
+            const a = document.getElementById('ui-teamA'), b = document.getElementById('ui-teamB');
+            if(currentTurn === 'A') { a.classList.add('active-team'); b.classList.remove('active-team'); }
+            else { b.classList.add('active-team'); a.classList.remove('active-team'); }
+        }
+
+        function drawWord() {
+            const word = gameWords[Math.floor(Math.random() * gameWords.length)];
+            document.getElementById('word-display').innerText = word;
+            document.getElementById('btn-draw').classList.add('hidden');
+            document.getElementById('btn-change').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btn-confirm').classList.remove('hidden');
+            changeCount = 0;
+            document.getElementById('btn-change').innerText = `换题 (剩 5 次)`;
+        }
+
+        function changeWord() {
+            if(changeCount >= 5) return;
+            changeCount++;
+            speak(`换题 第${changeCount}次`);
+            const word = gameWords[Math.floor(Math.random() * gameWords.length)];
+            document.getElementById('word-display').innerText = word;
+            document.getElementById('btn-change').innerText = `换题 (剩 ${5 - changeCount} 次)`;
+            if(changeCount >= 5) document.getElementById('btn-change').classList.add('opacity-50');
+        }
+
+        function confirmAndStart() {
+            document.getElementById('pre-game-controls').classList.add('hidden');
+            document.getElementById('active-game-controls').classList.remove('hidden');
+            document.getElementById('word-display').classList.add('hidden-word');
+            document.getElementById('hint-text').style.opacity = "1";
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timer); timeLeft = 60; isTimerRunning = true;
+            document.getElementById('timer').innerText = "60s";
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft + "s";
+                if(timeLeft <= 5 && timeLeft > 0) { document.body.classList.add('emergency'); speak(timeLeft.toString()); }
+                if(timeLeft <= 0) {
+                    clearInterval(timer); isTimerRunning = false;
+                    document.body.classList.remove('emergency');
+                    speak("时间到 Delay no more"); handleSwitch();
+                }
+            }, 1000);
+        }
+
+        const card = document.getElementById('card-area'), display = document.getElementById('word-display');
+        const handlePeek = () => { if(isTimerRunning) display.classList.add('peek-word'); };
+        const handleUnpeek = () => { display.classList.remove('peek-word'); };
+
+        card.addEventListener('touchstart', (e) => { e.preventDefault(); handlePeek(); });
+        card.addEventListener('touchend', handleUnpeek);
+        card.addEventListener('mousedown', handlePeek);
+        card.addEventListener('mouseup', handleUnpeek);
+
+        function handlePoint() {
+            clearInterval(timer); isTimerRunning = false; document.body.classList.remove('emergency');
+            if(currentTurn === 'A') { scoreA++; document.getElementById('scoreA').innerText = scoreA; }
+            else { scoreB++; document.getElementById('scoreB').innerText = scoreB; }
+            speak("噼里啪啦 砰 叻叻猪 啪啪啪啪啪"); checkWin(); resetRound();
+        }
+
+        function handleSwitch() {
+            clearInterval(timer); isTimerRunning = false; document.body.classList.remove('emergency');
+            speak("哈哈哈 Peter"); currentTurn = currentTurn === 'A' ? 'B' : 'A'; updateTurnUI(); resetRound();
+        }
+
+        function resetRound() {
+            document.getElementById('pre-game-controls').classList.remove('hidden');
+            document.getElementById('active-game-controls').classList.add('hidden');
+            document.getElementById('btn-draw').classList.remove('hidden');
+            document.getElementById('btn-confirm').classList.add('hidden');
+            document.getElementById('word-display').classList.remove('hidden-word');
+            document.getElementById('word-display').innerText = "READY?";
+            document.getElementById('hint-text').style.opacity = "0";
+            document.getElementById('timer').innerText = "60s";
+            document.getElementById('btn-change').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btn-change').innerText = `换题 (剩 5 次)`;
+        }
+
+        function checkWin() {
+            if(scoreA >= targetScore || scoreB >= targetScore) {
+                const winner = scoreA >= targetScore ? selected[0].name : selected[1].name;
+                confetti({ particleCount: 300, spread: 120, origin: { y: 0.6 } });
+                speak(`兴旺发 ${winner} 赢了 啪啪啪啪啪`);
+                setTimeout(() => location.reload(), 6000);
+            }
+        }
+    </script>
+</body>
+</html>
