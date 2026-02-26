@@ -42,11 +42,16 @@
         .title-char { display: inline-block; animation: char-bounce 2s infinite; }
         .char-1 { animation-delay: 0.1s; } .char-2 { animation-delay: 0.3s; } .char-3 { animation-delay: 0.5s; } .char-4 { animation-delay: 0.7s; }
 
+        /* 统一背光效果：无论什么队名，选中后都强制白色强光 */
+        @keyframes select-glow {
+            from { box-shadow: 0 0 10px #ffffff; }
+            to { box-shadow: 0 0 35px #ffffff, 0 0 10px #fbbf24; }
+        }
         .team-btn-selected { 
             border: 4px solid #ffffff !important;
-            box-shadow: 0 0 30px currentColor !important;
             transform: scale(1.08);
-            z-index: 10;
+            z-index: 50;
+            animation: select-glow 0.8s infinite alternate !important;
         }
 
         .active-team-glow { 
@@ -54,8 +59,8 @@
             border: 4px solid #ffffff !important;
         }
         @keyframes team-pulse {
-            from { box-shadow: 0 0 5px currentColor; }
-            to { box-shadow: 0 0 30px currentColor; }
+            from { box-shadow: 0 0 5px #ffffff; }
+            to { box-shadow: 0 0 30px #ffffff; }
         }
 
         .hidden-word { color: transparent !important; text-shadow: 0 0 40px rgba(0,0,0,1); user-select: none; }
@@ -149,19 +154,12 @@
 
     <script>
         const allWords = [
-            // 热梗与网络词 (更广更杂)
             "科目三", "孤勇者", "显眼包", "社交恐惧", "凡尔赛", "原地去世", "绝绝子", "泰裤辣", "芭比Q", "躺平", "摸鱼", "破防", "挖呀挖", "精神内耗", "特种兵", "反向带货", "恋爱脑", "电子榨菜", "孔乙己", "泰山崩", "恐龙抗狼", "我没意见", "你是我的神",
-            // 成语 (高频且难表演)
             "掩耳盗铃", "画蛇添足", "对牛弹琴", "闻鸡起舞", "指鹿为马", "守株待兔", "拔苗助长", "盲人摸象", "狼吞虎咽", "昂首挺胸", "呆若木鸡", "三心二意", "五体投地", "七上八下", "目瞪口呆", "垂头丧气", "手舞足蹈", "铁石心肠", "滥竽充数", "东施效颦", "亡羊补牢", "凿壁偷光", "卧薪尝胆",
-            // 动作/生活琐事 (细节化)
             "求婚", "碰瓷", "挤痘痘", "洗剪吹", "切洋葱", "吃火锅", "蹦迪", "举重", "美甲", "砍价", "整容", "相亲", "大扫除", "洗碗", "大笑", "掏耳朵", "敷面膜", "梦游", "跳绳", "拉肚子", "刮胡子", "修水管", "割双眼皮", "拍蚊子", "跳肚皮舞", "耍双节棍", "喝苦茶", "穿秋裤", "挤地铁",
-            // 动物/植物/自然
             "草泥马", "霸王龙", "哈士奇", "萤火虫", "食人鱼", "含羞草", "猪笼草", "仙人掌", "山竹", "红毛丹", "长颈鹿", "袋鼠", "企鹅", "火烈鸟", "树懒", "河马", "曼陀罗", "捕蝇草", "食人花", "变色龙", "大猩猩", "北极熊",
-            // 乐器与艺术
             "萨克斯", "架子鼓", "二胡", "口琴", "古筝", "芭蕾舞", "指挥家", "魔术师", "街舞", "京剧", "变脸", "拉小提琴", "弹钢琴", "打太极", "钢管舞",
-            // 职业与物品
             "宇航员", "外卖小哥", "保镖", "拆弹专家", "网红", "美人鱼", "僵尸", "间谍", "吸血鬼", "充电宝", "黑洞", "流星雨", "朋友圈", "比特币", "金字塔", "埃菲尔", "万里长城", "打字机", "显微镜", "灭火器", "跑步机", "救生圈", "ATM机",
-            // 大马元素 (精简版)
             "猫山王", "肉骨茶", "椰浆饭", "拉茶", "大耳窿", "跳槽", "摇脚", "茨厂街", "云顶高原", "黑风洞", "兴旺发", "西北够力", "打包", "饮茶", "搞定", "麻吉", "打工仔", "拿督", "油炸鬼", "娘惹", "啰惹", "巴刹", "五脚基"
         ];
 
@@ -184,7 +182,7 @@
         ];
 
         function unlockAndPlay() {
-            speak("年年有愚, fool 星高照, 游戏开始，先选你的队队!");
+            speak("年年有愚, fool 星高照, 游戏开始，请选你的队队!");
             document.getElementById('gate-screen').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
             renderTeams();
@@ -200,8 +198,14 @@
                 btn.style.backgroundColor = t.bg; btn.style.color = t.text;
                 btn.onclick = () => {
                     const idx = selected.findIndex(s => s.name === t.name);
-                    if(idx > -1) { selected.splice(idx, 1); btn.classList.remove('team-btn-selected'); }
-                    else if(selected.length < 2) { selected.push(t); btn.classList.add('team-btn-selected'); speak(t.name); }
+                    if(idx > -1) { 
+                        selected.splice(idx, 1); 
+                        btn.classList.remove('team-btn-selected'); 
+                    } else if(selected.length < 2) { 
+                        selected.push(t); 
+                        btn.classList.add('team-btn-selected'); 
+                        speak(t.name); 
+                    }
                 };
                 container.appendChild(btn);
             });
