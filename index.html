@@ -25,18 +25,32 @@
         /* 标题动画 */
         @keyframes char-bounce {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.3); color: #fbbf24; text-shadow: 0 0 15px #ef4444; }
+            50% { transform: scale(1.2); color: #fbbf24; text-shadow: 0 0 15px #ef4444; }
         }
         .title-char { display: inline-block; animation: char-bounce 2s infinite; }
         .char-1 { animation-delay: 0s; } .char-2 { animation-delay: 0.2s; } .char-3 { animation-delay: 0.4s; } .char-4 { animation-delay: 0.6s; }
 
-        /* 队伍选中光环 */
-        .active-team { transform: scale(1.05); border: 5px solid #fde047; box-shadow: 0 0 30px #ef4444; z-index: 10; }
+        /* 队名选中背光效果 */
+        .team-btn-selected { 
+            border: 4px solid #ffffff !important;
+            box-shadow: 0 0 25px currentColor !important;
+            transform: scale(1.05);
+        }
+
+        /* 游戏进行中的队名发光 */
+        .active-team-glow { 
+            animation: team-pulse 1.5s infinite alternate;
+            border: 4px solid #ffffff !important;
+        }
+        @keyframes team-pulse {
+            from { box-shadow: 0 0 5px currentColor; }
+            to { box-shadow: 0 0 25px currentColor; }
+        }
 
         /* 题目状态 */
         .hidden-word { color: transparent !important; text-shadow: 0 0 40px rgba(0,0,0,1); user-select: none; }
         .peek-word { color: #1e293b !important; text-shadow: none !important; }
-        .reveal-answer { color: #dc2626 !important; text-shadow: none !important; transform: scale(1.2); transition: all 0.3s; }
+        .reveal-answer { color: #dc2626 !important; text-shadow: none !important; transform: scale(1.1); transition: all 0.3s; }
         
         /* 5秒倒计时变红 */
         @keyframes bg-red-flash { 0%, 100% { background-color: #020617; } 50% { background-color: #991b1b; } }
@@ -45,7 +59,7 @@
         /* 启动按钮 */
         @keyframes pulse-gold { 
             0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); } 
-            70% { box-shadow: 0 0 0 25px rgba(251, 191, 36, 0); } 
+            70% { box-shadow: 0 0 0 30px rgba(251, 191, 36, 0); } 
             100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } 
         }
         .start-btn { animation: pulse-gold 1.5s infinite; background: radial-gradient(circle, #facc15, #ea580c); }
@@ -59,36 +73,38 @@
         <h1 class="text-6xl font-black mb-12 italic tracking-tighter">
             <span class="text-red-500">年年</span><span class="text-amber-400">有愚</span>
         </h1>
-        <button onclick="unlockAndPlay()" class="start-btn w-56 h-56 rounded-full text-slate-900 font-black text-3xl shadow-2xl border-4 border-amber-200">
-            开局
+        <button onclick="unlockAndPlay()" class="start-btn w-60 h-60 rounded-full text-slate-900 font-black text-4xl shadow-2xl border-4 border-amber-200">
+            柑，你拿
         </button>
         <p class="mt-8 text-amber-200/60 font-bold tracking-widest uppercase">FOOL星高照</p>
     </div>
 
-    <div id="setup-screen" class="fixed inset-0 bg-slate-900/95 z-50 flex flex-col items-center p-6 overflow-y-auto hidden">
-        <div class="mb-6">
+    <div id="setup-screen" class="fixed inset-0 bg-slate-900/98 z-50 flex flex-col items-center p-6 overflow-y-auto hidden">
+        <div class="mb-2">
             <span class="title-char char-1 text-5xl font-black">年</span>
             <span class="title-char char-2 text-5xl font-black">年</span>
             <span class="title-char char-3 text-5xl font-black">有</span>
             <span class="title-char char-4 text-5xl font-black">愚</span>
         </div>
+        <p class="text-amber-400 font-black tracking-[0.5em] mb-8">FOOL星高照</p>
+
         <div class="w-full max-w-md space-y-6">
-            <div class="grid grid-cols-2 gap-3" id="team-selector"></div>
-            <div class="bg-slate-800/80 p-5 rounded-3xl border border-red-900/50 text-center shadow-inner">
-                <p class="mb-3 font-bold text-amber-100">目标分数: <span id="target-display" class="text-2xl text-yellow-400">10</span></p>
+            <div class="grid grid-cols-2 gap-4" id="team-selector"></div>
+            <div class="bg-slate-800/80 p-5 rounded-3xl border border-red-900/50 text-center">
+                <p class="mb-3 font-bold text-amber-100 italic">目标分数: <span id="target-display" class="text-2xl text-yellow-400">10</span></p>
                 <input type="range" min="5" max="15" value="10" id="target-slider" oninput="document.getElementById('target-display').innerText=this.value" class="w-full h-3 bg-slate-700 rounded-lg appearance-none accent-red-500">
             </div>
             <button onclick="confirmTeams()" class="w-full bg-red-600 hover:bg-red-500 text-white font-black py-5 rounded-2xl text-2xl shadow-xl border-b-8 border-red-800 active:border-0 active:translate-y-1">确认开战</button>
         </div>
     </div>
 
-    <div class="w-full max-w-sm flex justify-between mb-6 gap-2">
-        <div id="ui-teamA" class="p-4 rounded-[2rem] text-center w-[48%] transition-all border-4 border-transparent bg-slate-800/50">
-            <p id="labelA" class="text-[10px] font-black opacity-60 uppercase truncate">Team A</p>
+    <div class="w-full max-w-sm flex justify-between mb-6 gap-3">
+        <div id="ui-teamA" class="p-4 rounded-[2rem] text-center w-[48%] transition-all border-4 border-transparent bg-slate-800/80">
+            <p id="labelA" class="text-[12px] font-black opacity-80 uppercase truncate">Team A</p>
             <p id="scoreA" class="text-5xl font-black">0</p>
         </div>
-        <div id="ui-teamB" class="p-4 rounded-[2rem] text-center w-[48%] transition-all border-4 border-transparent bg-slate-800/50">
-            <p id="labelB" class="text-[10px] font-black opacity-60 uppercase truncate">Team B</p>
+        <div id="ui-teamB" class="p-4 rounded-[2rem] text-center w-[48%] transition-all border-4 border-transparent bg-slate-800/80">
+            <p id="labelB" class="text-[12px] font-black opacity-80 uppercase truncate">Team B</p>
             <p id="scoreB" class="text-5xl font-black">0</p>
         </div>
     </div>
@@ -96,7 +112,7 @@
     <div id="card-area" class="w-full max-w-sm bg-white rounded-[4rem] shadow-[0_20px_50px_rgba(220,38,38,0.3)] p-10 text-center relative h-80 flex flex-col items-center justify-center border-8 border-red-50">
         <div id="timer" class="absolute top-8 text-4xl font-mono text-slate-300 font-black italic">60s</div>
         <div id="word-display" class="text-5xl font-black text-slate-800">READY?</div>
-        <div id="hint-text" class="absolute bottom-8 text-[10px] text-slate-400 font-bold opacity-0 transition-opacity">长按屏幕查看谜底</div>
+        <div id="hint-text" class="absolute bottom-8 text-[11px] text-slate-400 font-bold opacity-0 transition-opacity">长按屏幕查看谜底</div>
     </div>
 
     <div class="w-full max-w-sm mt-8 space-y-4">
@@ -104,21 +120,21 @@
             <button id="btn-draw" onclick="drawWord()" class="w-full bg-red-600 text-yellow-300 font-black py-6 rounded-3xl text-3xl shadow-2xl border-b-8 border-red-800 active:border-0 active:translate-y-2">抽 题</button>
             <div id="change-confirm-group" class="hidden space-y-3">
                 <button id="btn-change" onclick="changeWord()" class="w-full bg-slate-800 text-amber-400 font-bold py-4 rounded-2xl border-2 border-slate-700">换题 (剩 2 次)</button>
-                <button onclick="confirmAndStart()" class="w-full bg-emerald-500 text-white font-black py-5 rounded-3xl text-xl shadow-lg border-b-8 border-emerald-700 active:border-0 active:translate-y-1">确认并开始计时</button>
+                <button onclick="confirmAndStart()" class="w-full bg-emerald-500 text-white font-black py-5 rounded-3xl text-2xl shadow-lg border-b-8 border-emerald-700 active:border-0 active:translate-y-1">开始计时</button>
             </div>
         </div>
         
         <div id="active-game-controls" class="grid grid-cols-2 gap-4 hidden">
             <button onclick="handlePoint()" class="bg-amber-400 text-slate-900 font-black py-6 rounded-3xl shadow-xl text-2xl border-b-8 border-amber-600 active:border-0 active:translate-y-1">+1 答对</button>
-            <button onclick="handleSwitch()" class="bg-slate-700 text-white font-bold py-6 rounded-3xl shadow-lg border-b-8 border-slate-900 active:border-0 active:translate-y-1">抢题/嘲讽</button>
+            <button onclick="handleSwitch()" class="bg-slate-700 text-white font-bold py-6 rounded-3xl shadow-lg border-b-8 border-slate-900 active:border-0 active:translate-y-1 uppercase">答错 Next</button>
         </div>
     </div>
 
     <script>
         const vocabulary = {
-            noun: ["猫山王", "茨厂街", "肉骨茶", "椰浆饭", "打工仔", "大耳窿", "跳槽", "山竹", "拉茶", "臭豆", "红包", "万能", "扫地机器人", "智能手机", "充电宝", "自拍杆", "无线耳机", "电饭煲", "羽毛球", "网球", "运动鞋", "行李箱", "墨镜", "手表", "香水", "口红", "指甲油", "洗面奶", "纸巾", "电蚊拍", "圆珠笔", "闹钟", "花瓶", "鱼缸", "狗粮", "筷子", "饭盒", "保温杯"],
-            verb: ["摇脚", "跳楼机", "刷牙", "洗脸", "求婚", "自拍", "打呼噜", "梦游", "剔牙", "弹吉他", "举重", "潜水", "蹦极", "攀岩", "游泳", "跑步", "跳绳", "按摩", "化妆", "购物", "砍价", "加班", "辞职", "面试", "出差", "搬家", "装修", "洗碗", "叠衣服", "炒菜", "煲汤", "洗车", "修车", "遛狗", "喂鱼", "浇水", "摄影", "剪辑", "直播", "玩游戏", "网购", "送外卖", "点外卖", "约会", "相亲", "结婚", "考试", "找工作"],
-            adj: ["生草", "西北够力", "大镬", "离谱", "奇葩", "极品", "高大上", "接地气", "萌萌哒", "霸气", "威武", "淡定", "低调", "奢华", "简约", "清新", "帅气", "沙雕", "滑稽", "搞笑", "幽默", "尴尬", "无语", "崩溃", "心碎", "忐忑", "迷茫", "无助", "孤独", "辣", "甜", "脆", "软", "亮", "贵", "便宜"]
+            noun: ["猫山王", "茨厂街", "肉骨茶", "椰浆饭", "大马卡", "烧米", "啰惹", "巴刹", "打工仔", "大耳窿", "跳槽", "山竹", "拉茶", "咖喱面", "云吞面", "波霸奶茶", "江鱼仔", "臭豆", "娘惹", "红包", "大彩", "万能", "扫地机器人", "智能手机", "充电宝", "吸尘器", "微波炉", "热水壶", "吹风机", "电动牙刷", "羽毛球", "背包", "钱包", "行李箱", "遮阳伞", "墨镜", "手表", "香水", "口红", "指甲油", "纸巾", "电蚊拍", "计算器", "闹钟", "花瓶", "鱼缸", "牵引绳", "筷子", "勺子", "叉子", "碗", "盘", "杯", "饭盒", "保温杯"],
+            verb: ["摇脚", "跳楼机", "刷牙", "洗脸", "求婚", "自拍", "打呼噜", "梦游", "剔牙", "弹吉他", "举重", "潜水", "蹦极", "攀岩", "打乒乓", "踢足球", "游泳", "跑步", "跳绳", "健身", "理发", "化妆", "美甲", "购物", "砍价", "加班", "辞职", "面试", "开会", "旅游", "搬家", "打扫", "洗碗", "洗衣服", "炒菜", "煲汤", "洗车", "修车", "遛狗", "喂鱼", "浇水", "摄影", "拍视频", "剪辑", "直播", "玩游戏", "提现", "炒股", "存钱", "贷款", "约会", "相亲", "结婚", "考试", "找工作"],
+            adj: ["生草", "西北够力", "大镬", "离谱", "奇葩", "极品", "高大上", "接地气", "萌萌哒", "酷炫", "霸气", "威武", "淡定", "低调", "奢华", "复古", "文艺", "清新", "帅气", "呆萌", "任性", "沙雕", "滑稽", "搞笑", "尴尬", "无语", "崩溃", "忐忑", "迷茫", "无助", "辣", "甜", "脆", "软", "滑", "快", "慢", "贵", "便宜"]
         };
 
         const teams = [
@@ -139,7 +155,7 @@
         };
 
         function unlockAndPlay() {
-            speak("年年有愚, fool 星高照, 兴旺发!");
+            speak("年年有愚, fool 星高照, 游戏开始!");
             document.getElementById('gate-screen').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
             renderTeams();
@@ -151,14 +167,17 @@
             teams.forEach(t => {
                 const btn = document.createElement('button');
                 btn.innerText = t.name;
-                btn.className = "py-4 rounded-2xl font-black border-4 border-transparent transition-all active:scale-95 shadow-lg bg-slate-800";
-                btn.style.color = t.bg;
+                btn.className = "py-4 rounded-2xl font-black text-lg border-4 border-transparent transition-all active:scale-95 shadow-lg";
+                btn.style.backgroundColor = t.bg;
+                btn.style.color = t.text;
                 btn.onclick = () => {
                     const idx = selected.findIndex(s => s.name === t.name);
-                    if(idx > -1) { selected.splice(idx, 1); btn.style.borderColor = "transparent"; }
-                    else if(selected.length < 2) { 
+                    if(idx > -1) { 
+                        selected.splice(idx, 1); 
+                        btn.classList.remove('team-btn-selected');
+                    } else if(selected.length < 2) { 
                         selected.push(t); 
-                        btn.style.borderColor = "#ef4444"; 
+                        btn.classList.add('team-btn-selected');
                         speak(t.name);
                     }
                 };
@@ -179,8 +198,11 @@
 
         function updateTurnUI() {
             const a = document.getElementById('ui-teamA'), b = document.getElementById('ui-teamB');
-            if(currentTurn === 'A') { a.classList.add('active-team'); b.classList.remove('active-team'); }
-            else { b.classList.add('active-team'); a.classList.remove('active-team'); }
+            if(currentTurn === 'A') { 
+                a.classList.add('active-team-glow'); b.classList.remove('active-team-glow'); 
+            } else { 
+                b.classList.add('active-team-glow'); a.classList.remove('active-team-glow'); 
+            }
         }
 
         function drawWord() {
@@ -207,6 +229,7 @@
         }
 
         function confirmAndStart() {
+            speak("狗, 狗, 狗");
             document.getElementById('pre-game-controls').classList.add('hidden');
             document.getElementById('active-game-controls').classList.remove('hidden');
             document.getElementById('word-display').classList.add('hidden-word');
