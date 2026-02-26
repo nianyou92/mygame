@@ -184,7 +184,7 @@
         ];
 
         function unlockAndPlay() {
-            speak("年年有愚, fool 星高照, 游戏开始!");
+            speak("年年有愚, fool 星高照, 游戏开始，先选你的队队!");
             document.getElementById('gate-screen').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
             renderTeams();
@@ -209,7 +209,7 @@
 
         function confirmTeams() {
             if(selected.length < 2) return alert("选两队先啦!");
-            speak("开战咯!");
+            speak("开战罗!");
             targetScore = parseInt(document.getElementById('target-slider').value);
             document.getElementById('labelA').innerText = selected[0].name;
             document.getElementById('labelB').innerText = selected[1].name;
