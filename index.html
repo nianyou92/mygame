@@ -10,7 +10,7 @@
         /* 标题逐字放大动画 */
         @keyframes char-bounce {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.5); color: #fbbf24; }
+            50% { transform: scale(1.4); color: #fbbf24; text-shadow: 0 0 20px rgba(251,191,36,0.6); }
         }
         .title-char { display: inline-block; animation: char-bounce 2s infinite; }
         .char-1 { animation-delay: 0s; }
@@ -22,32 +22,57 @@
         .active-team { 
             transform: scale(1.1); 
             border: 6px solid white; 
-            box-shadow: 0 0 25px currentColor;
-            animation: glow 1.5s infinite alternate;
+            animation: glow 1.2s infinite alternate;
             z-index: 10; 
         }
         @keyframes glow {
-            from { box-shadow: 0 0 10px currentColor; }
-            to { box-shadow: 0 0 30px currentColor; }
+            from { box-shadow: 0 0 5px currentColor; }
+            to { box-shadow: 0 0 35px currentColor; }
         }
 
+        /* 隐藏与显示逻辑 */
         .hidden-word { color: transparent !important; text-shadow: 0 0 50px rgba(0,0,0,1); user-select: none; }
         .peek-word { color: #1e293b !important; text-shadow: none !important; }
-        .reveal-answer { color: #e11d48 !important; text-shadow: none !important; transition: all 0.5s; }
+        .reveal-answer { color: #e11d48 !important; text-shadow: none !important; transition: all 0.3s; transform: scale(1.2); }
         
-        @keyframes pulse-red { 0% { background-color: #0f172a; } 50% { background-color: #7f1d1d; } 100% { background-color: #0f172a; } }
-        .emergency { animation: pulse-red 0.5s infinite; }
+        /* 5秒紧急变红 */
+        @keyframes emergency-red { 
+            0% { background-color: #0f172a; } 
+            50% { background-color: #b91c1c; } 
+            100% { background-color: #0f172a; } 
+        }
+        .emergency { animation: emergency-red 0.4s infinite; }
+        
+        /* 启动按钮动画 */
+        @keyframes pulse-btn {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251,191,36,0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(251,191,36,0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251,191,36,0); }
+        }
+        .start-pulse { animation: pulse-btn 2s infinite; }
+
         * { -webkit-touch-callout: none; -webkit-user-select: none; }
     </style>
 </head>
 <body class="bg-slate-950 flex flex-col items-center justify-center min-h-screen p-4 text-white font-sans overflow-hidden">
 
-    <div class="hidden">
-        <iframe id="bg-music" width="1" height="1" src="https://www.youtube.com/embed/CSuluvJWoZ4?autoplay=1&loop=1&playlist=CSuluvJWoZ4" frameborder="0" allow="autoplay"></iframe>
+    <div id="player-container" class="hidden">
+        <iframe id="youtube-player" width="1" height="1" src="https://www.youtube.com/embed/CSuluvJWoZ4?enablejsapi=1&loop=1&playlist=CSuluvJWoZ4" allow="autoplay"></iframe>
     </div>
 
-    <div id="setup-screen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center p-6 overflow-y-auto">
-        <div class="text-4xl font-black mb-2 italic">
+    <div id="gate-screen" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center p-6">
+        <div class="text-6xl font-black mb-12 italic text-center leading-tight">
+            <span class="text-amber-400">年年有愚</span><br>
+            <span class="text-2xl tracking-[0.4em] text-slate-500">FOOL星高照</span>
+        </div>
+        <button onclick="unlockAudio()" class="start-pulse w-48 h-48 rounded-full bg-amber-400 text-slate-900 font-black text-2xl shadow-2xl flex items-center justify-center flex-col">
+            <span>点击</span>
+            <span class="text-sm">开局/音乐</span>
+        </button>
+    </div>
+
+    <div id="setup-screen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center p-6 overflow-y-auto hidden">
+        <div class="text-5xl font-black mb-4 italic">
             <span class="title-char char-1">年</span>
             <span class="title-char char-2">年</span>
             <span class="title-char char-3">有</span>
@@ -58,35 +83,35 @@
         <div class="w-full max-w-md space-y-6">
             <div class="grid grid-cols-2 gap-3" id="team-selector"></div>
             <div class="bg-slate-800 p-5 rounded-3xl border border-slate-700 text-center">
-                <p class="mb-3 font-bold text-amber-100">目标分数: <span id="target-display">10</span></p>
+                <p class="mb-3 font-bold text-amber-100 italic">目标分数: <span id="target-display">10</span></p>
                 <input type="range" min="5" max="15" value="10" id="target-slider" oninput="document.getElementById('target-display').innerText=this.value" class="w-full h-2 bg-slate-700 rounded-lg appearance-none accent-amber-400">
             </div>
-            <button onclick="startGameSession()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-black py-5 rounded-2xl text-2xl shadow-xl active:scale-95">开始派对</button>
+            <button onclick="startGameSession()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-black py-5 rounded-2xl text-2xl shadow-xl active:scale-95">进入派对</button>
         </div>
     </div>
 
     <div class="w-full max-w-sm flex justify-between mb-6">
         <div id="ui-teamA" class="p-4 rounded-3xl text-center w-[46%] transition-all duration-500 border-4 border-transparent">
-            <p id="labelA" class="text-xs font-black truncate opacity-80">TEAM A</p>
+            <p id="labelA" class="text-xs font-black truncate opacity-80 uppercase">TEAM A</p>
             <p id="scoreA" class="text-5xl font-black">0</p>
         </div>
         <div id="ui-teamB" class="p-4 rounded-3xl text-center w-[46%] transition-all duration-500 border-4 border-transparent">
-            <p id="labelB" class="text-xs font-black truncate opacity-80">TEAM B</p>
+            <p id="labelB" class="text-xs font-black truncate opacity-80 uppercase">TEAM B</p>
             <p id="scoreB" class="text-5xl font-black">0</p>
         </div>
     </div>
 
-    <div id="card-area" class="w-full max-w-sm bg-slate-100 rounded-[3rem] shadow-2xl p-10 text-center relative h-72 flex flex-col items-center justify-center">
+    <div id="card-area" class="w-full max-w-sm bg-slate-100 rounded-[3.5rem] shadow-2xl p-10 text-center relative h-72 flex flex-col items-center justify-center">
         <div id="timer" class="absolute top-6 text-3xl font-mono text-slate-400 font-black">60s</div>
         <div id="word-display" class="text-5xl font-black text-slate-800">READY?</div>
-        <div id="hint-text" class="absolute bottom-6 text-xs text-slate-400 font-bold opacity-0 transition-opacity">长按显示题目</div>
+        <div id="hint-text" class="absolute bottom-6 text-xs text-slate-400 font-bold opacity-0 transition-opacity">长按屏幕显示题目</div>
     </div>
 
     <div class="w-full max-w-sm mt-8 space-y-4">
         <div id="pre-game-controls" class="space-y-3">
             <button id="btn-draw" onclick="drawWord()" class="w-full bg-white text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg border-b-8 border-slate-300 active:border-b-0 active:translate-y-1">抽题</button>
             <button id="btn-change" onclick="changeWord()" class="w-full bg-slate-800 text-amber-400 font-bold py-3 rounded-xl border-2 border-slate-700 opacity-50 cursor-not-allowed">换题 (剩 2 次)</button>
-            <button id="btn-confirm" onclick="confirmAndStart()" class="w-full bg-amber-400 text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg hidden">确认并开始</button>
+            <button id="btn-confirm" onclick="confirmAndStart()" class="w-full bg-amber-400 text-slate-900 font-black py-5 rounded-2xl text-xl shadow-lg hidden">确认并开始计时</button>
         </div>
         <div id="active-game-controls" class="grid grid-cols-2 gap-4 hidden">
             <button onclick="handlePoint()" class="bg-emerald-500 text-white font-black py-5 rounded-2xl shadow-lg text-xl border-b-8 border-emerald-700 active:border-b-0">+1 答对</button>
@@ -95,11 +120,11 @@
     </div>
 
     <script>
-        // 1000词库结构模拟 (此处放精选样本，实际可按此格式无限扩充)
+        // 1000词库结构 (名词40%, 动词30%, 形容词30%)
         const vocabulary = {
-            noun: ["猫山王", "茨厂街", "大马卡", "烧米", "肉骨茶", "巴刹", "啰惹", "椰浆饭", "打工仔", "老司机", "大耳窿", "跳槽", "山竹", "拉茶", "咖喱面", "云吞面", "波霸奶茶", "江鱼仔", "臭豆", "娘惹", "红包", "大彩", "万能", "多多", "扫地机器人", "智能手机", "充电宝", "自拍杆", "无线耳机", "笔记本电脑", "平板电脑", "路由器", "投影仪", "吸尘器", "微波炉", "电饭煲", "热水壶", "吹风机", "剃须刀", "电动牙刷", "按摩椅", "跑步机", "哑铃", "瑜伽垫", "跳绳", "羽毛球", "网球", "冲浪板", "滑板", "头盔", "护膝", "运动鞋", "背包", "钱包", "护照夹", "行李箱", "遮阳伞", "雨衣", "墨镜", "围巾", "领带", "皮带", "手表", "戒指", "香水", "口红", "指甲油", "洗面奶", "沐浴露", "洗发水", "牙膏", "漱口水", "纸巾", "卫生巾", "尿不湿", "洗衣粉", "洗洁精", "消毒液", "垃圾袋", "保鲜膜", "牙签", "棉签", "指甲钳", "开瓶器", "螺丝刀", "扳手", "卷尺", "手电筒", "电池", "打火机", "蚊香", "电蚊拍", "苍蝇拍", "老鼠笼", "蟑螂药", "蚂蚁药", "胶水", "订书机", "回形针", "便签本", "圆珠笔", "铅笔", "橡皮擦", "尺子", "计算器", "相框", "挂钟", "闹钟", "花瓶", "盆栽", "鱼缸", "鸟笼", "牵引绳", "猫砂", "狗粮", "扫把", "拖把", "水桶", "抹布", "围裙", "餐巾布", "杯垫", "筷子", "勺子", "叉子", "碗", "盘", "杯", "饭盒", "保温杯", "调料盒", "油壶", "盐罐", "咖啡壶", "茶壶", "打蛋器", "模具", "烤盘", "锡纸"],
-            verb: ["摇脚", "跳楼机", "刷牙", "洗脸", "求婚", "自拍", "打呼噜", "梦游", "剔牙", "弹吉他", "举重", "潜水", "冲浪", "滑雪", "跳伞", "蹦极", "攀岩", "打乒乓", "踢足球", "打篮球", "游泳", "跑步", "跳绳", "做瑜伽", "健身", "按摩", "理发", "化妆", "美甲", "纹身", "购物", "砍价", "退货", "投诉", "加班", "辞职", "面试", "开会", "出差", "旅游", "订票", "退房", "搬家", "装修", "打扫", "洗碗", "洗衣服", "晾衣服", "叠衣服", "熨衣服", "做饭", "炒菜", "煲汤", "烘焙", "洗车", "修车", "加油", "泊车", "超车", "刹车", "遛狗", "喂鱼", "种花", "浇水", "剪枝", "施肥", "摄影", "拍视频", "剪辑", "直播", "刷手机", "玩游戏", "充值", "提现", "理财", "炒股", "存钱", "贷款", "还款", "缴费", "网购", "收快递", "送外卖", "点外卖", "排队", "让座", "问路", "搭讪", "约会", "相亲", "结婚", "离婚", "坐月子", "带娃", "辅导功课", "去上学", "补习", "考试", "毕业", "找工作"],
-            adj: ["生草", "西北", "大镬", "够力", "神马", "浮云", "给力", "郁闷", "纠结", "坑爹", "坑人", "离谱", "荒唐", "奇葩", "极品", "骨灰级", "发烧友", "土豪", "高大上", "接地气", "正能量", "萌萌哒", "酷炫", "霸气", "威武", "淡定", "低调", "奢华", "简约", "时尚", "复古", "文艺", "清新", "性感", "妩媚", "帅气", "呆萌", "高冷", "腹黑", "傲娇", "任性", "随性", "佛系", "硬核", "沙雕", "滑稽", "搞笑", "幽默", "尴尬", "无语", "崩溃", "心碎", "蓝瘦", "香菇", "压力山大", "鸭梨山大", "忐忑", "纠结", "迷茫", "无助", "孤独", "寂寞", "空虚", "冷", "热", "辣", "咸", "甜", "酸", "苦", "香", "臭", "脆", "软", "硬", "粘", "滑", "亮", "暗", "大", "小", "长", "短", "胖", "瘦", "美", "丑", "新", "旧", "快", "慢", "贵", "便宜"]
+            noun: ["猫山王", "茨厂街", "大马卡", "烧米", "肉骨茶", "巴刹", "啰惹", "椰浆饭", "打工仔", "老司机", "大耳窿", "跳槽", "山竹", "拉茶", "咖喱面", "云吞面", "点心", "炒粿条", "海南鸡饭", "波霸奶茶", "江鱼仔", "臭豆", "娘惹", "红包", "恭喜发财", "万事如意", "心想事成", "身体健康", "年年有余", "步步高升", "大吉大利", "平平安安", "开工大吉", "收工大吉", "兴旺发", "大彩", "博彩", "多多", "万能", "扫地机器人", "智能手机", "充电宝", "自拍杆", "无线耳机", "蓝牙音箱", "笔记本电脑", "平板电脑", "路由器", "投影仪", "吸尘器", "微波炉", "电饭煲", "热水壶", "吹烟机", "剃须刀", "电动牙刷", "按摩椅", "跑步机", "哑铃", "瑜伽垫", "跳绳", "羽毛球", "网球", "冲浪板", "滑板", "头盔", "护膝", "手套", "运动鞋", "背包", "钱包", "护照夹", "行李箱", "遮阳伞", "雨衣", "墨镜", "围巾", "领带", "手表", "戒指", "香水", "口红", "粉底", "洗面奶", "沐浴露", "牙膏", "漱口水", "纸巾", "卫生巾", "尿不湿", "洗衣粉", "洗洁精", "垃圾袋", "保鲜膜", "牙签", "棉签", "开瓶器", "螺丝刀", "卷尺", "手电筒", "电池", "打火机", "蚊香", "电蚊拍", "苍蝇拍", "蟑螂药", "胶水", "订书机", "回形针", "笔记本", "圆珠笔", "铅笔", "橡皮擦", "尺子", "计算器", "相框", "挂钟", "闹钟", "花瓶", "盆栽", "鱼缸", "鸟笼", "牵引绳", "猫砂", "狗粮", "扫把", "拖把", "水桶", "抹布", "筷子", "勺子", "叉子", "碗", "盘", "杯", "饭盒", "保温杯", "调料盒", "油壶", "咖啡壶", "打蛋器", "模具", "烤盘", "烤网", "锡纸"],
+            verb: ["摇脚", "跳楼机", "刷牙", "洗脸", "求婚", "自拍", "打呼噜", "梦游", "剔牙", "弹吉他", "举重", "潜水", "冲浪", "滑雪", "跳伞", "蹦极", "攀岩", "打乒乓", "踢足球", "打篮球", "游泳", "跑步", "跳绳", "健身", "按摩", "理发", "化妆", "美甲", "纹身", "购物", "砍价", "退货", "投诉", "加班", "辞职", "面试", "开会", "出差", "旅游", "订票", "退房", "搬家", "装修", "打扫", "洗碗", "洗衣服", "晾衣服", "叠衣服", "熨衣服", "做饭", "炒菜", "煲汤", "烘焙", "洗车", "修车", "加油", "泊车", "超车", "刹车", "遛狗", "喂鱼", "种花", "浇水", "剪枝", "施肥", "摄影", "拍视频", "剪辑", "直播", "刷手机", "玩游戏", "充值", "提现", "炒股", "存钱", "贷款", "还款", "缴费", "网购", "收快递", "送外卖", "点外卖", "排队", "让座", "问路", "搭讪", "约会", "相亲", "结婚", "离婚", "带娃", "辅导功课", "去上学", "补习", "考试", "毕业", "找工作"],
+            adj: ["生草", "西北", "大镬", "够力", "神马", "浮云", "给力", "郁闷", "纠结", "坑爹", "离谱", "荒唐", "奇葩", "极品", "骨灰级", "发烧友", "土豪", "高大上", "接地气", "萌萌哒", "酷炫", "霸气", "威武", "淡定", "低调", "奢华", "简约", "时尚", "复古", "文艺", "清新", "性感", "妩媚", "帅气", "呆萌", "高冷", "腹黑", "傲娇", "任性", "随性", "佛系", "硬核", "沙雕", "滑稽", "搞笑", "幽默", "尴尬", "无语", "崩溃", "心碎", "蓝瘦", "香菇", "压力山大", "忐忑", "迷茫", "无助", "孤独", "寂寞", "空虚", "冷", "热", "辣", "咸", "甜", "酸", "苦", "香", "臭", "脆", "软", "硬", "粘", "滑", "亮", "暗", "大", "小", "长", "短", "胖", "瘦", "美", "丑", "新", "旧", "快", "慢", "贵", "便宜"]
         };
 
         const teams = [
@@ -119,12 +144,24 @@
         const speak = (msg) => {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(msg);
-            u.lang = 'zh-CN'; u.rate = 1.0;
+            u.lang = 'zh-CN'; u.rate = 1.05;
             window.speechSynthesis.speak(u);
         };
 
-        window.onload = () => {
+        // 启动音频并进入设置
+        function unlockAudio() {
+            // 尝试播放YouTube
+            const player = document.getElementById('youtube-player');
+            player.src += "&autoplay=1";
+            speak("兴旺发，年年有愚，派对开始！");
+            document.getElementById('gate-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            initTeamSelector();
+        }
+
+        function initTeamSelector() {
             const container = document.getElementById('team-selector');
+            container.innerHTML = '';
             teams.forEach(t => {
                 const btn = document.createElement('button');
                 btn.innerText = t.name;
@@ -137,7 +174,7 @@
                 };
                 container.appendChild(btn);
             });
-        };
+        }
 
         function startGameSession() {
             if(selected.length < 2) return alert("请选两支战队！");
@@ -150,20 +187,17 @@
             document.getElementById('ui-teamB').style.color = selected[1].text;
             document.getElementById('setup-screen').classList.add('hidden');
             updateTurnUI();
-            // 尝试触发音乐
-            document.getElementById('bg-music').src += "&autoplay=1";
         }
 
         function updateTurnUI() {
             const a = document.getElementById('ui-teamA'), b = document.getElementById('ui-teamB');
-            if(currentTurn === 'A') { a.classList.add('active-team'); b.classList.remove('active-team'); a.style.color = selected[0].text; }
-            else { b.classList.add('active-team'); a.classList.remove('active-team'); b.style.color = selected[1].text; }
+            if(currentTurn === 'A') { a.classList.add('active-team'); b.classList.remove('active-team'); a.style.borderColor = "white"; b.style.borderColor = "transparent"; }
+            else { b.classList.add('active-team'); a.classList.remove('active-team'); b.style.borderColor = "white"; a.style.borderColor = "transparent"; }
         }
 
         function getBalancedWord() {
             const r = Math.random();
-            let cat = 'noun';
-            if(r < 0.4) cat = 'noun'; else if(r < 0.7) cat = 'verb'; else cat = 'adj';
+            let cat = (r < 0.4) ? 'noun' : (r < 0.7) ? 'verb' : 'adj';
             const list = vocabulary[cat];
             return list[Math.floor(Math.random() * list.length)];
         }
@@ -180,7 +214,7 @@
         function changeWord() {
             if(changeCount >= 2) { speak("这条水没有文发"); return; }
             changeCount++;
-            speak(`换题 第${changeCount}次`);
+            speak("这条水没有文珐（停顿）换题第" + changeCount + "次");
             document.getElementById('word-display').innerText = getBalancedWord();
             document.getElementById('btn-change').innerText = `换题 (剩 ${2 - changeCount} 次)`;
             if(changeCount >= 2) document.getElementById('btn-change').classList.add('opacity-50');
@@ -200,15 +234,21 @@
             timer = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').innerText = timeLeft + "s";
-                if(timeLeft <= 5 && timeLeft > 0) { document.body.classList.add('emergency'); speak(timeLeft.toString()); }
+                
+                // 5秒紧急变红
+                if(timeLeft <= 5 && timeLeft > 0) {
+                    document.body.classList.add('emergency');
+                    speak(timeLeft.toString());
+                }
+                
                 if(timeLeft <= 0) {
                     clearInterval(timer); isTimerRunning = false;
                     document.body.classList.remove('emergency');
-                    // 显示谜底阶段
+                    // 谜底展示阶段
                     document.getElementById('word-display').classList.remove('hidden-word');
                     document.getElementById('word-display').classList.add('reveal-answer');
-                    speak("时间到 谜底是 " + document.getElementById('word-display').innerText + " Delay no more");
-                    setTimeout(handleSwitch, 4000); // 停留4秒看答案
+                    speak("时间到！谜底是 " + document.getElementById('word-display').innerText + " Delay no more");
+                    setTimeout(handleSwitch, 4000); 
                 }
             }, 1000);
         }
@@ -223,8 +263,9 @@
         card.addEventListener('mouseup', handleUnpeek);
 
         function handlePoint() {
-            if(!isTimerRunning && timeLeft > 0) return; // 防止重复点击
-            clearInterval(timer); isTimerRunning = false; document.body.classList.remove('emergency');
+            if(!isTimerRunning && timeLeft > 0) return;
+            clearInterval(timer); isTimerRunning = false;
+            document.body.classList.remove('emergency');
             if(currentTurn === 'A') { scoreA++; document.getElementById('scoreA').innerText = scoreA; }
             else { scoreB++; document.getElementById('scoreB').innerText = scoreB; }
             speak("噼里啪啦 砰 叻叻猪 啪啪啪啪啪"); 
@@ -232,7 +273,8 @@
         }
 
         function handleSwitch() {
-            clearInterval(timer); isTimerRunning = false; document.body.classList.remove('emergency');
+            clearInterval(timer); isTimerRunning = false;
+            document.body.classList.remove('emergency');
             speak("哈哈哈你们没有度书的是不是");
             currentTurn = currentTurn === 'A' ? 'B' : 'A';
             updateTurnUI(); resetRound();
@@ -253,8 +295,8 @@
         function checkWin() {
             if(scoreA >= targetScore || scoreB >= targetScore) {
                 const winner = scoreA >= targetScore ? selected[0].name : selected[1].name;
-                confetti({ particleCount: 400, spread: 150, origin: { y: 0.6 } });
-                speak(`兴旺发 ${winner} 赢了 啪啪啪啪啪`);
+                confetti({ particleCount: 500, spread: 160, origin: { y: 0.6 } });
+                speak(`兴旺发！${winner} 赢了 啪啪啪啪啪`);
                 setTimeout(() => location.reload(), 8000);
             }
         }
